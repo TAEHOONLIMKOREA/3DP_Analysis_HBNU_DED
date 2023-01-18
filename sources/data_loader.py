@@ -1,38 +1,24 @@
 import csv
 import datetime
 import pandas as pd
-from influxdb import InfluxDBClient
-
+from sources import influx_helper
 
 def csv_data_load_pandas(file_path):
-    # 판다스로 읽기
-    df = pd.read_csv('data/20220612_DED.csv')
+    # 판다스로 파일 읽기
+    df = pd.read_csv('data/20220612_DED.csv', sep=',')
+    df['Time'] = '2022-06-' + df['Time']
+    df['Time'] = pd.to_datetime(df['Time'], format='%Y-%m-%d_%H:%M:%S.%f')
 
-    # df['Time'] = pd.to_datetime(df['Time'], format='%d%b%Y:%H:%M:%S.%f')
+    # 'Time'을 데이터프레임 인덱스로 지정
+    df.set_index('Time', inplace=True)
 
-    print(df)
-
-
+    return df
 
 
 def csv_data_load(file_path):
     # 그냥 파일로 읽기
     f = open('data/20220612_DED.csv', 'r')
     csvreader = csv.reader(f)
-
-    columns = next(csvreader)
-    fist_value = next(csvreader)
-
-
-    host = 'keties.iptime.org'
-    port = 55586
-    client = InfluxDBClient(host=host, port=port)
-    dbname = 'HBNU_DED'
-    measurement = '20220612_1454'
-
-    print("Create database: " + dbname)
-    client.drop_database(dbname)
-    client.create_database(dbname)
 
     # create data
     data = []
@@ -56,7 +42,7 @@ def csv_data_load(file_path):
 
         point = [
             {
-                'measurement': measurement,
+                'measurement': influx_helper.info.measurement,
                 'tags': {
                     'Layer_Z': Z,
                 },
@@ -76,5 +62,8 @@ def csv_data_load(file_path):
                 'time': timestamp
             }
         ]
+
+        print(point)
         print("Write points: {0}".format(point))
-        client.write_points(point, database=dbname)
+
+        influx_helper.data_insert(point)
