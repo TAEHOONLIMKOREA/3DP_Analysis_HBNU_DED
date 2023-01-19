@@ -20,50 +20,38 @@ def csv_data_load(file_path):
     f = open('data/20220612_DED.csv', 'r')
     csvreader = csv.reader(f)
 
+    # This line skips the first row of the CSV file.
+    next(csvreader)
+
     # create data
     data = []
     for row in csvreader:
         time_str = '2022-06-' + row[0]
-        format_ = '%Y-%m-%d_%H:%M:%S.%f'
-        timestamp = datetime.datetime.strptime(time_str, format_)
 
-        X = float(row[1])
-        Y = float(row[2])
-        Z = float(row[3])
-        Height = float(row[4])
-        Temper = float(row[5])
-        LaserPower = float(row[6])
-        PowderGas = float(row[7])
-        CoaxialGas = float(row[8])
-        ShieldGas = float(row[9])
-        Feeder1 = int(row[10])
-        Feeder2 = int(row[11])
-        Feeder3 = int(row[12])
+        timestamp = datetime.datetime.strptime(time_str, '%Y-%m-%d_%H:%M:%S.%f' )
 
-        point = [
-            {
+        point = {
                 'measurement': influx_helper.info.measurement,
                 'tags': {
-                    'Layer_Z': Z,
+                    'Layer_Z': float(row[3]),
                 },
                 'fields': {
-                    'X': X,
-                    'Y': Y,
-                    'Height': Height,
-                    'Temper': Temper,
-                    'LaserPower': LaserPower,
-                    'PowderGas': PowderGas,
-                    'CoaxialGas': CoaxialGas,
-                    'ShieldGas': ShieldGas,
-                    'Feeder1': Feeder1,
-                    'Feeder2': Feeder2,
-                    'Feeder3': Feeder3
+                    'X': float(row[1]),
+                    'Y': float(row[2]),
+                    'Height': float(row[4]),
+                    'Temper': float(row[5]),
+                    'LaserPower': float(row[6]),
+                    'PowderGas': float(row[7]),
+                    'CoaxialGas': float(row[8]),
+                    'ShieldGas': float(row[9]),
+                    'Feeder1': int(row[10]),
+                    'Feeder2': int(row[11]),
+                    'Feeder3': int(row[12])
                 },
                 'time': timestamp
             }
-        ]
 
-        print(point)
-        print("Write points: {0}".format(point))
-
-        influx_helper.data_insert(point)
+        data.append(point)
+        # print("Write points: {0}".format(point))
+    print(data)
+    return data
