@@ -31,7 +31,7 @@ def csv_data_load(file_path):
         timestamp = datetime.datetime.strptime(time_str, '%Y-%m-%d_%H:%M:%S.%f' )
 
         point = {
-                'measurement': influx_helper.info.measurement,
+                'measurement': influx_helper.measurement,
                 'tags': {
                     'Layer_Z': float(row[3]),
                 },
